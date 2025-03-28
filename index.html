@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Manipulator</title>
+    <!-- Google Fonts - Noto Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="https://graphics.goodhearttech.org/GHT/favicons/favicon.svg">
+    <style>
+        :root {
+            --primary: #7189ff;
+            --dark-blue: #394053;
+            --gray: #808080;
+            --light-blue: #a0ddff;
+            --rich-black: #091D20;
+            --white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: var(--rich-black);
+            color: var(--white);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--light-blue);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .editor-container {
+            background-color: var(--dark-blue);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            flex-grow: 1;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            padding: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Noto Sans', sans-serif;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: opacity 0.2s;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .dropdown-btn:hover {
+            opacity: 0.9;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--dark-blue);
+            min-width: 250px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: var(--white);
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--primary);
+        }
+
+        .dropdown-content a:active {
+            background-color: var(--light-blue);
+            color: var(--rich-black);
+        }
+
+        #editor {
+            width: 100%;
+            min-height: 400px;
+            background-color: var(--dark-blue);
+            color: var(--white);
+            border: none;
+            font-family: 'Noto Sans', sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            padding: 1rem;
+            outline: none;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            resize: vertical;
+            min-height: 400px;
+            max-height: 80vh;
+        }
+
+        #editor:focus {
+            outline: none;
+        }
+
+        .download-container {
+            text-align: center;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Noto Sans', sans-serif;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn i {
+            font-size: 1.1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .disclaimer {
+            color: var(--gray);
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .logo-link {
+            display: inline-block;
+        }
+
+        .footer-logo {
+            height: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-link:hover .footer-logo {
+            transform: scale(1.1);
+        }
+
+        .copyright {
+            color: var(--white);
+        }
+
+        .donate-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: opacity 0.2s;
+        }
+
+        .donate-btn:hover {
+            opacity: 0.9;
+        }
+
+        .github-link {
+            color: var(--white);
+            font-size: 1.2rem;
+            transition: color 0.2s;
+        }
+
+        .github-link:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Text Manipulator</h1>
+            <p class="subtitle">A powerful tool for text manipulation and editing</p>
+        </header>
+
+        <main class="editor-container">
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <button class="btn" id="undoBtn" title="Undo (Ctrl+Z)">
+                        <i class="fas fa-undo"></i>
+                        Undo (Ctrl+Z)
+                    </button>
+
+                    <div class="dropdown">
+                        <button class="dropdown-btn" title="Cleanup">
+                            <i class="fas fa-broom"></i>
+                            Cleanup
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#" onclick="manipulateText('dedent')">Dedent / Normalize Indentation</a>
+                            <a href="#" onclick="manipulateText('removeAllWhitespace')">Remove All Whitespace</a>
+                            <a href="#" onclick="manipulateText('removeDuplicates')">Remove Duplicates</a>
+                            <a href="#" onclick="manipulateText('removeEmptyLines')">Remove Empty Lines</a>
+                            <a href="#" onclick="manipulateText('removeLineBreaks')">Remove Line Breaks</a>
+                            <a href="#" onclick="manipulateText('removeNonPrintable')">Remove Non-Printable Characters</a>
+                            <a href="#" onclick="manipulateText('removeSpecialChars')">Remove Special Characters</a>
+                            <a href="#" onclick="manipulateText('stripHtml')">Strip HTML Tags</a>
+                            <a href="#" onclick="manipulateText('trimWhitespace')">Trim Leading/Trailing Whitespace</a>
+                        </div>
+                    </div>
+
+                    <div class="dropdown">
+                        <button class="dropdown-btn" title="Formatting">
+                            <i class="fas fa-text-height"></i>
+                            Formatting
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#" onclick="manipulateText('addLineNumbers')">Add Line Numbers</a>
+                            <a href="#" onclick="manipulateText('capitalizeWords')">Capitalize Each Word</a>
+                            <a href="#" onclick="manipulateText('toLowerCase')">Convert to lowercase</a>
+                            <a href="#" onclick="manipulateText('toUpperCase')">Convert to UPPERCASE</a>
+                            <a href="#" onclick="manipulateText('escapeHtml')">Escape HTML Entities</a>
+                            <a href="#" onclick="manipulateText('unescapeHtml')">Unescape HTML Entities</a>
+                            <a href="#" onclick="manipulateText('prefixSuffix')">Prefix/Suffix Lines</a>
+                            <a href="#" onclick="manipulateText('reverseChars')">Reverse Characters</a>
+                            <a href="#" onclick="manipulateText('reverseLines')">Reverse Lines</a>
+                            <a href="#" onclick="manipulateText('sortAscending')">Sort Lines Ascending</a>
+                            <a href="#" onclick="manipulateText('sortDescending')">Sort Lines Descending</a>
+                            <a href="#" onclick="manipulateText('wrapLines')">Wrap Lines at X Characters</a>
+                        </div>
+                    </div>
+
+                    <div class="dropdown">
+                        <button class="dropdown-btn" title="Conversion">
+                            <i class="fas fa-exchange-alt"></i>
+                            Conversion
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#" onclick="manipulateText('prettyJson')">Pretty Print JSON</a>
+                            <a href="#" onclick="manipulateText('listToJson')">Convert List to JSON Array</a>
+                            <a href="#" onclick="manipulateText('toSlug')">Convert to Slug</a>
+                            <a href="#" onclick="manipulateText('toCsv')">Convert to CSV (Comma Separated)</a>
+                            <a href="#" onclick="manipulateText('toTsv')">Convert to TSV (Tab Separated)</a>
+                            <a href="#" onclick="manipulateText('encodeBase64')">Encode to Base64</a>
+                            <a href="#" onclick="manipulateText('decodeBase64')">Decode from Base64</a>
+                            <a href="#" onclick="manipulateText('encodeUrl')">URL Encode</a>
+                            <a href="#" onclick="manipulateText('decodeUrl')">URL Decode</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="editor" contenteditable="true" placeholder="Enter or paste your text here..."></div>
+        </main>
+
+        <div class="download-container">
+            <button class="btn" id="downloadTxtBtn">
+                <i class="fas fa-file-alt"></i>
+                Download as TXT
+            </button>
+        </div>
+
+        <footer>
+            <div class="disclaimer">
+                This tool is for informational use only. Accuracy is not guaranteed, and it may become outdated or stop functioning. Use at your own discretion.
+            </div>
+            <div class="footer-content">
+                <a href="https://goodhearttech.org/" target="_blank" class="logo-link">
+                    <img src="https://graphics.goodhearttech.org/GHT-AllWhiteLogo-phishsite.png" alt="Good Heart Tech Logo" class="footer-logo">
+                </a>
+                <span class="copyright">© <span id="currentYear"></span> All rights reserved.</span>
+                <a href="https://goodhearttech.org/donate/" target="_blank" class="donate-btn">
+                    <i class="fas fa-heart"></i>
+                    Donate
+                </a>
+                <a href="https://github.com/Good-Heart-Technology/Text-Manipulator" target="_blank" class="github-link">
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+    <script src="script.js"></script>
+</body>
+</html> 
