@@ -2,19 +2,40 @@
 const EDITOR_PLACEHOLDER = 'Enter or paste your text here...';
 const READING_SPEED = 200; // words per minute
 const SPEAKING_SPEED = 130; // words per minute
+const STATS_UPDATE_DELAY = 500; // ms delay for stats updates
+const LARGE_TEXT_THRESHOLD = 10000; // characters
 
 // DOM Elements
 const editor = document.getElementById('editor');
 const downloadTxtBtn = document.getElementById('downloadTxtBtn');
 const undoBtn = document.getElementById('undoBtn');
+const copyBtn = document.getElementById('copyBtn');
 const fullWidthToggle = document.getElementById('fullWidthToggle');
 const editorContainer = document.querySelector('.editor-container');
 const showAdvancedStats = document.getElementById('showAdvancedStats');
 const advancedStats = document.getElementById('advancedStats');
+const loadingOverlay = document.getElementById('loadingOverlay');
 
 // History management
 let history = [];
 let currentIndex = -1;
+let statsUpdateTimeout = null;
+
+function showLoading() {
+    loadingOverlay.classList.add('active');
+    const loadingText = loadingOverlay.querySelector('.loading-text');
+    if (loadingText) {
+        loadingText.style.display = 'block';
+    }
+}
+
+function hideLoading() {
+    loadingOverlay.classList.remove('active');
+    const loadingText = loadingOverlay.querySelector('.loading-text');
+    if (loadingText) {
+        loadingText.style.display = 'none';
+    }
+}
 
 function addToHistory(text) {
     // Remove any future states if we're not at the end
@@ -327,21 +348,54 @@ function resetStats() {
     }
 }
 
+// Debounced stats calculation
+function debouncedCalculateStats() {
+    if (statsUpdateTimeout) {
+        clearTimeout(statsUpdateTimeout);
+    }
+    
+    statsUpdateTimeout = setTimeout(() => {
+        calculateStats();
+    }, STATS_UPDATE_DELAY);
+}
+
 // Event Listeners
 editor.addEventListener('input', () => {
     addToHistory(editor.innerText);
-    calculateStats();
+    debouncedCalculateStats();
 });
 
-editor.addEventListener('keyup', calculateStats);
-editor.addEventListener('mouseup', calculateStats);
-editor.addEventListener('select', calculateStats);
-editor.addEventListener('selectionchange', calculateStats);
+editor.addEventListener('keyup', debouncedCalculateStats);
+editor.addEventListener('mouseup', debouncedCalculateStats);
+editor.addEventListener('select', debouncedCalculateStats);
+editor.addEventListener('selectionchange', debouncedCalculateStats);
 
-editor.addEventListener('paste', (e) => {
+editor.addEventListener('paste', async (e) => {
     e.preventDefault();
     const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
+    
+    // Show loading for large text
+    if (text.length > LARGE_TEXT_THRESHOLD) {
+        showLoading();
+    }
+    
+    try {
+        // Use requestAnimationFrame to prevent UI blocking
+        await new Promise(resolve => {
+            requestAnimationFrame(() => {
+                document.execCommand('insertText', false, text);
+                resolve();
+            });
+        });
+        
+        // Add to history and update stats after paste
+        addToHistory(editor.innerText);
+        debouncedCalculateStats();
+    } finally {
+        if (text.length > LARGE_TEXT_THRESHOLD) {
+            hideLoading();
+        }
+    }
 });
 
 undoBtn.addEventListener('click', undo);
@@ -365,6 +419,25 @@ document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.key === 'z') {
         e.preventDefault();
         undo();
+    }
+});
+
+// Copy to clipboard functionality
+copyBtn.addEventListener('click', async () => {
+    try {
+        const text = editor.innerText;
+        await navigator.clipboard.writeText(text);
+        
+        // Show success state
+        copyBtn.style.backgroundColor = '#4CAF50';
+        
+        // Remove success state after animation
+        setTimeout(() => {
+            copyBtn.style.backgroundColor = '';
+        }, 2000);
+    } catch (error) {
+        console.error('Error copying text:', error);
+        alert('Failed to copy text to clipboard. Please try again.');
     }
 });
 

@@ -429,7 +429,7 @@
             <p class="subtitle">A powerful tool for text manipulation and editing, provided by <a href="https://goodhearttech.org/" target="_blank">Good Heart Tech</a>.</p>
             <div class="security-notice">
                 <i class="fas fa-shield-alt"></i>
-                All processing occurs locally within the browser. No queries or results are recorded on our systems
+                All processing occurs locally within the browser. No inputs or results are recorded on our systems.
             </div>
         </header>
 
@@ -440,11 +440,19 @@
                         <i class="fas fa-undo"></i>
                         Undo (Ctrl+Z)
                     </button>
-
+                    <button class="btn" id="copyBtn" title="Copy to Clipboard">
+                        <i class="fas fa-copy"></i>
+                        Copy Text
+                    </button>
+                    <button class="btn" id="downloadTxtBtn" title="Download as TXT">
+                        <i class="fas fa-file-alt"></i>
+                        Download as TXT
+                    </button>
                     <div class="dropdown">
                         <button class="dropdown-btn" title="Cleanup">
                             <i class="fas fa-broom"></i>
                             Cleanup
+                            <i class="fas fa-chevron-down dropdown-indicator"></i>
                         </button>
                         <div class="dropdown-content">
                             <a href="#" onclick="manipulateText('dedent')">Dedent / Normalize Indentation</a>
@@ -463,6 +471,7 @@
                         <button class="dropdown-btn" title="Formatting">
                             <i class="fas fa-text-height"></i>
                             Formatting
+                            <i class="fas fa-chevron-down dropdown-indicator"></i>
                         </button>
                         <div class="dropdown-content">
                             <a href="#" onclick="manipulateText('addLineNumbers')">Add Line Numbers</a>
@@ -484,6 +493,7 @@
                         <button class="dropdown-btn" title="Conversion">
                             <i class="fas fa-exchange-alt"></i>
                             Conversion
+                            <i class="fas fa-chevron-down dropdown-indicator"></i>
                         </button>
                         <div class="dropdown-content">
                             <a href="#" onclick="manipulateText('prettyJson')">Pretty Print JSON</a>
@@ -503,6 +513,10 @@
                 <i class="fas fa-arrows-alt-h"></i>
             </button>
             <div id="editor" contenteditable="true" placeholder="Enter or paste your text here..."></div>
+            <div id="loadingOverlay" class="loading-overlay">
+                <div class="loading-spinner"></div>
+                <div class="loading-text" style="display: none;">Processing text...</div>
+            </div>
         </main>
 
         <div class="stats-container">
@@ -545,13 +559,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="download-container">
-            <button class="btn" id="downloadTxtBtn">
-                <i class="fas fa-file-alt"></i>
-                Download as TXT
-            </button>
         </div>
 
         <footer>
